@@ -51,7 +51,6 @@ class SendMails():
     def create_msg(self, recipients):
         msg = MIMEMultipart()
         recipients_str = ', '.join(recipients)
-        print(recipients_str)
         msg['To'] = recipients_str
         msg['From'] = self.from_str
         msg['Subject'] = self.subject
