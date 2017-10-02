@@ -8,43 +8,69 @@ from email.mime.application import MIMEApplication
 from mails_list import FINAL_LIST
 from html_str import HTML_STR
 
+
 #  Enable less secure apps here: https://myaccount.google.com/lesssecureapps
-my_mail = 'my_mail@mail.com'
-from_str = 'My Name'
-my_password = 'password'
-subject = 'Hello!'
-my_file = 'file.txt'
-text = HTML_STR
+class SendMails():
 
+    def __init__(self, my_mail, from_str, my_password, subject, my_file=None, text='', recipients=None):
+        """
+        my_mail = 'my_mail@mail.com'
+        from_str = 'My Name'
+        my_password = 'password'
+        subject = 'Hello!'
+        my_file = 'file.txt' - not required
+        text = 'Hi there!' - not required. If not specified text from html_str.py is used.
+        recipients = [[...], ] - not required. If not specified list from mails_list.py is used.
+        """
+        self.my_mail = my_mail
+        self.from_str = from_str
+        self.my_password = my_password
+        self.subject = subject
+        self.my_file = my_file
+        self.text = text or HTML_STR
+        self.recipients = recipients or FINAL_LIST
 
-def send_mail():
-    gmailUser = my_mail
+    def get_file(self):
+        if self.my_file:
+            with open(self.my_file, "rb") as f:
+                part = MIMEApplication(
+                    f.read(),
+                    Name=basename(self.my_file)
+                )
+                part['Content-Disposition'] = 'attachment; filename="%s"' % basename(self.my_file)
+            return part
+        else:
+            return None
 
-    with open(my_file, "rb") as f:
-        part = MIMEApplication(
-            f.read(),
-            Name=basename(my_file)
-        )
-        part['Content-Disposition'] = 'attachment; filename="%s"' % basename(my_file)
+    def conect_to_gmail_server(self):
+        mail_server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        mail_server.ehlo()
+        mail_server.login(self.my_mail, self.my_password)
+        return mail_server
 
-    mailServer = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-    mailServer.ehlo()
-    mailServer.login(gmailUser, my_password)
-
-    for idx, recipient in enumerate(FINAL_LIST[940:]):
+    def create_msg(self, recipients):
         msg = MIMEMultipart()
-        msg['To'] = recipient
-        msg['From'] = from_str
-        msg['Subject'] = subject
+        recipients_str = ', '.join(recipients)
+        print(recipients_str)
+        msg['To'] = recipients_str
+        msg['From'] = self.from_str
+        msg['Subject'] = self.subject
         # msg.attach(MIMEText(text))
-        msg.attach(MIMEText(text.format(recipient), 'html'))
-        msg.attach(part)
+        html = self.text.format(id=recipients[0], recipients=recipients_str)
+        msg.attach(MIMEText(html, 'html'))
+        file_part = self.get_file()
+        if file_part:
+            msg.attach(file_part)
+        return msg
 
-        mailServer.sendmail(gmailUser, recipient, msg.as_string())
-        print("{}: {}".format(idx, recipient))
-        time.sleep(1)
+    def send_mails(self):
+        mail_server = self.conect_to_gmail_server()
 
-    mailServer.close()
+        for idx, recipients in enumerate(self.recipients):
+            msg = self.create_msg(recipients)
 
+            mail_server.sendmail(self.my_mail, recipients, msg.as_string())
+            print("{}: {}".format(idx, recipients))
+            time.sleep(1)
 
-send_mail()
+        mail_server.close()

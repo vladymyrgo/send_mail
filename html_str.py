@@ -60,7 +60,7 @@ HTML_STR = """<html>
             Desired salary: 74000$ (I pay taxes on my side)<br>
                 </p>
             </div>
-            <img src="http://109.95.53.54/{}/pixel.png">
+            <img src="http://109.95.53.54/{id}/pixel.png">
         </div>
     </div>
   </body>
