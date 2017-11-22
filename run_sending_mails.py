@@ -45,9 +45,9 @@ for site in ordered_contacts:
 
 # SETTINGS
 sd = SendMails(
-    my_mail='vova.gos.mail@gmail.com',
+    my_mail='',
     from_str='Vova Gosha',
-    my_password='snakagosha88',
+    my_password='',
     subject='Python / IOS developer',
     my_file='/home/vladimir/Downloads/CV Vova Python IOS developer.pdf',
     text=HTML_TEXT,
